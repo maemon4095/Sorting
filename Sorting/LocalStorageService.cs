@@ -4,6 +4,20 @@ namespace Sorting;
 
 public class LocalStorageService
 {
+    class WeakEventLink
+    {
+        public WeakReference<EventHandler<string>> HandlerReference;
+
+        public WeakEventLink? Next;
+
+        public bool TryGet(out EventHandler<string>? handler) => this.HandlerReference.TryGetTarget(out handler);
+
+        public WeakEventLink(EventHandler<string> handler)
+        {
+            this.HandlerReference = new(handler);
+        }
+    }
+
     const string ClassName = "LocalStorageExtension";
     const string SetMethod = $"{ClassName}.SetLocalStorage";
     const string GetMethod = $"{ClassName}.GetLocalStorage";
@@ -12,9 +26,39 @@ public class LocalStorageService
     const string ClearMethod = $"{ClassName}.ClearLocalStorage";
     const string IsAvailableMethod = $"{ClassName}.LocalStorageIsAvailable";
 
-    private readonly IJSRuntime jsRuntime;
+    readonly object _lock = new();
+    readonly IJSRuntime jsRuntime;
+    WeakEventLink? handlers = null;
 
-    public event EventHandler<string>? StorageChanged;
+    public event EventHandler<string> StorageChanged
+    {
+        add
+        {
+            lock (this._lock)
+            {
+                var head = this.handlers;
+                var link = new WeakEventLink(value);
+                this.handlers = link;
+                if (head is not null) head.Next = link;
+            }
+        }
+        remove
+        {
+            lock (this._lock)
+            {
+                ref var head = ref this.handlers;
+                while (head is not null)
+                {
+                    if (!head.TryGet(out var handler) || handler == value)
+                    {
+                        head = head.Next;
+                        if (head is null) break;
+                    }
+                    head = ref head.Next;
+                }
+            }
+        }
+    }
 
     public LocalStorageService(IJSRuntime jsRuntime) => this.jsRuntime = jsRuntime;
 
@@ -39,5 +83,26 @@ public class LocalStorageService
 
     public ValueTask Clear() => this.jsRuntime.InvokeVoidAsync(ClearMethod);
 
-    private void InvokeStorageChanged(string key) => this.StorageChanged?.Invoke(this, key);
+
+
+    private void InvokeStorageChanged(string key)
+    {
+        lock (this._lock)
+        {
+            ref var head = ref this.handlers;
+            while (head is not null)
+            {
+                if (head.TryGet(out var handler))
+                {
+                    handler?.Invoke(this, key);
+                }
+                else
+                {
+                    head = head.Next;
+                    if (head is null) break;
+                }
+                head = ref head.Next;
+            }
+        }
+    }
 }
