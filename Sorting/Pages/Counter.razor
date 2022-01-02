@@ -1,0 +1,61 @@
+﻿@inject LocalStorageService localStorage
+@implements IDisposable
+@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<p>Contains :  @contains</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button @onclick="Remove">Remove</button>
+
+@code {
+    private int currentCount;
+    private bool contains;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.contains = await localStorage.Contains(nameof(this.currentCount));
+        this.currentCount = await this.LoadCurrentCount() ?? 0;
+        localStorage.StorageChanged += OnStorageUpdated;
+
+
+        Console.WriteLine("init");
+    }
+
+    void IDisposable.Dispose()
+    {
+        localStorage.StorageChanged -= OnStorageUpdated;
+    }
+
+    private async void IncrementCount()
+    {
+        Console.WriteLine("increment");
+        this.currentCount++;
+        await localStorage.Set(nameof(this.currentCount), this.currentCount.ToString());
+    }
+    private async void Remove()
+    {
+        await localStorage.Remove(nameof(this.currentCount));
+    }
+
+    private async ValueTask<int?> LoadCurrentCount()
+    {
+        var str = await localStorage.Get(nameof(this.currentCount));
+        if (int.TryParse(str, out var num)) return num;
+        return null;
+    }
+
+    async void OnStorageUpdated(object? sender, string? key)
+    {
+        Console.WriteLine(key);
+        if (key != nameof(this.currentCount)) return;
+        this.contains = await localStorage.Contains(nameof(this.currentCount));
+        this.currentCount = await this.LoadCurrentCount() ?? 0;
+        this.StateHasChanged();
+    }
+}
