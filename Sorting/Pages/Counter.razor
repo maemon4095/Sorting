@@ -1,4 +1,5 @@
-﻿@inject LocalStorageService localStorage
+﻿@using Sorting.Storage;
+@inject Sorting.Storage.LocalStorageService localStorage
 @implements IDisposable
 @page "/counter"
 
@@ -50,10 +51,10 @@
         return null;
     }
 
-    async void OnStorageUpdated(object? sender, string? key)
+    async void OnStorageUpdated(object? sender, LocalStorageEventArgs args)
     {
-        Console.WriteLine(key);
-        if (key != nameof(this.currentCount)) return;
+        Console.WriteLine(args);
+        if (args is not { Key: nameof(this.currentCount) }) return;
         this.contains = await localStorage.Contains(nameof(this.currentCount));
         this.currentCount = await this.LoadCurrentCount() ?? 0;
         this.StateHasChanged();
