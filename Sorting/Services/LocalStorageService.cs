@@ -16,16 +16,16 @@ public class LocalStorageService : IAsyncDisposable
     const string ClearLocalStorageEventHandleMethod = $"{ClassName}.ClearLocalStorageEventHandle";
 
     readonly IJSRuntime jsRuntime;
-    readonly IDisposablePublisher<LocalStorageEventArgs> storageChangedPublisher;
-    readonly CountedSubscriber<LocalStorageEventArgs> storageChangedSubscriber;
+    readonly IDisposablePublisher<LocalStorageEvent> storageChangedPublisher;
+    readonly CountedSubscriber<LocalStorageEvent> storageChangedSubscriber;
     readonly DotNetObjectReference<LocalStorageService>? reference;
-    public ISubscriber<LocalStorageEventArgs> StorageChanged => this.storageChangedSubscriber;
+    public ISubscriber<LocalStorageEvent> StorageChanged => this.storageChangedSubscriber;
     public LocalStorageService(IJSRuntime jsRuntime)
     {
         this.reference = DotNetObjectReference.Create(this);
         this.jsRuntime = jsRuntime;
-        (this.storageChangedPublisher, var subscriber) = GlobalMessagePipe.CreateEvent<LocalStorageEventArgs>();
-        this.storageChangedSubscriber = new CountedSubscriber<LocalStorageEventArgs>(subscriber);
+        (this.storageChangedPublisher, var subscriber) = GlobalMessagePipe.CreateEvent<LocalStorageEvent>();
+        this.storageChangedSubscriber = new CountedSubscriber<LocalStorageEvent>(subscriber);
         this.storageChangedSubscriber.CountChanged.Subscribe(async tuple =>
         {
             switch (tuple)
@@ -68,7 +68,7 @@ public class LocalStorageService : IAsyncDisposable
 
     [JSInvokable]
     public void FireStorageChanged(string category, string key, string oldValue, string newValue) => this.InvokeStorageChanged(new(Enum.Parse<LocalStorageEventCategory>(category), key, oldValue, newValue));
-    private void InvokeStorageChanged(LocalStorageEventArgs args) => this.storageChangedPublisher.Publish(args);
+    private void InvokeStorageChanged(LocalStorageEvent args) => this.storageChangedPublisher.Publish(args);
 }
 
 

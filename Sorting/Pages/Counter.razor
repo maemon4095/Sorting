@@ -13,8 +13,8 @@
 <p>Contains :  @contains</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<button @onclick="Remove">Remove</button>
-
+<button @onclick=Remove>Remove</button>
+<button @onclick=Clear>Clear</button>
 
 @code {
     private int currentCount;
@@ -38,6 +38,12 @@
         this.currentCount++;
         await localStorage.Set(nameof(this.currentCount), this.currentCount.ToString());
     }
+
+    private async void Clear()
+    {
+        await localStorage.Clear();
+    }
+
     private async void Remove()
     {
         await localStorage.Remove(nameof(this.currentCount));
@@ -50,9 +56,9 @@
         return null;
     }
 
-    async void OnStorageUpdated(LocalStorageEventArgs args)
+    async void OnStorageUpdated(LocalStorageEvent args)
     {
-        if (args is not { Key: nameof(this.currentCount) }) return;
+        if (!args.IsRelatedTo(nameof(this.currentCount))) return;
         this.contains = await localStorage.Contains(nameof(this.currentCount));
         this.currentCount = await this.LoadCurrentCount() ?? 0;
         this.StateHasChanged();
