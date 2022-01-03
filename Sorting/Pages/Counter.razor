@@ -1,5 +1,6 @@
-﻿@using Sorting.Storage;
-@inject Sorting.Storage.LocalStorageService localStorage
+﻿@using Sorting.Services
+@using MessagePipe
+@inject LocalStorageService localStorage
 @implements IDisposable
 @page "/counter"
 
@@ -14,28 +15,26 @@
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 <button @onclick="Remove">Remove</button>
 
+
 @code {
     private int currentCount;
     private bool contains;
+    private IDisposable? storageChangedSubscription;
 
     protected override async Task OnInitializedAsync()
     {
         this.contains = await localStorage.Contains(nameof(this.currentCount));
         this.currentCount = await this.LoadCurrentCount() ?? 0;
-        localStorage.StorageChanged += OnStorageUpdated;
-
-
-        Console.WriteLine("init");
+        this.storageChangedSubscription = localStorage.StorageChanged.Subscribe(this.OnStorageUpdated);
     }
 
     void IDisposable.Dispose()
     {
-        localStorage.StorageChanged -= OnStorageUpdated;
+        this.storageChangedSubscription?.Dispose();
     }
 
     private async void IncrementCount()
     {
-        Console.WriteLine("increment");
         this.currentCount++;
         await localStorage.Set(nameof(this.currentCount), this.currentCount.ToString());
     }
@@ -51,9 +50,8 @@
         return null;
     }
 
-    async void OnStorageUpdated(object? sender, LocalStorageEventArgs args)
+    async void OnStorageUpdated(LocalStorageEventArgs args)
     {
-        Console.WriteLine(args);
         if (args is not { Key: nameof(this.currentCount) }) return;
         this.contains = await localStorage.Contains(nameof(this.currentCount));
         this.currentCount = await this.LoadCurrentCount() ?? 0;

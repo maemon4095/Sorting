@@ -1,7 +1,36 @@
 ﻿@page "/"
+@using Sorting.Services
+@using MessagePipe
+@inject DimensionService dimension
+@implements IDisposable
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
+<p>@dimensions</p>
+<button @onclick=OnClick> getsize </button>
 
-Welcome to your new app.
+@code {
+    Dimension2D? dimensions;
+    IDisposable? subscription;
+    protected override async Task OnInitializedAsync()
+    {
+        this.dimensions = await dimension.GetInnerWindowDimensions();
+
+        this.subscription = dimension.OnResize.Subscribe(async s => 
+            { 
+                this.dimensions = await s.GetInnerWindowDimensions();
+                this.StateHasChanged();
+            });
+    }
+
+    private async void OnClick()
+    {
+        this.dimensions = await dimension.GetInnerWindowDimensions();
+    }
+
+    public void Dispose()
+    {
+        this.subscription?.Dispose();
+    }
+}

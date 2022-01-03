@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
-using Sorting.Storage;
-namespace Sorting;
+namespace Sorting.Services;
 
 public static class LocalStorageServiceExtension
 {

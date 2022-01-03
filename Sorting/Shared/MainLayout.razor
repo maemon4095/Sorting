@@ -1,20 +1,38 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager navigationManager
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
     <main>
         <article class="content px-4">
-            <ErrorBoundary>
+            <ErrorBoundary @ref="errorBoundary">
                 <ChildContent>
                     @Body
                 </ChildContent>
                 <ErrorContent>
-                    <p>Exception Occured : @context.Message</p>
+                    <p>Exception Occured : @context.GetType()</p>
+                    <p>@context.Message</p>
+                    <button @onclick="Reload">reload</button>
                 </ErrorContent>
             </ErrorBoundary>
         </article>
     </main>
+
+    <div class="sidebar">
+        <NavMenu />
+    </div>
 </div>
+
+@code {
+    private ErrorBoundary? errorBoundary;
+    protected override void OnParametersSet() => this.Recover();
+
+    private void Recover() => this.errorBoundary?.Recover();
+
+    private void Reload()
+    {
+        this.Recover();
+        this.navigationManager.NavigateTo(this.navigationManager.Uri, forceLoad: true);
+    }
+
+}
