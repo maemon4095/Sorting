@@ -33,7 +33,7 @@
       "url": "_framework\/icudt.dat"
     },
     {
-      "hash": "sha256-Qi2Zo5Zyi7eSjTlLxeK7rkSTPB7LHT9aAOKGcfJGztY=",
+      "hash": "sha256-MDviZkRRAD8u+rs4N53yIMgIyHhKCksFrdps+IAmMp8=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -97,7 +97,7 @@
       "url": "_framework\/Microsoft.JSInterop.WebAssembly.dll"
     },
     {
-      "hash": "sha256-5haU7B6e+RaPMfIDJNAniumj5WSNLLQeFGRXfBXcbUE=",
+      "hash": "sha256-PVr\/zkE2XXH++TY4kW9QXJCrOjOBj5rYLltcYhQnaG0=",
       "url": "_framework\/Sorting.dll"
     },
     {
@@ -249,7 +249,7 @@
       "url": "js\/DimensionExtension.js"
     },
     {
-      "hash": "sha256-pJiYso99KkQmueo95sZFWEJOhJ6MKFa00y5P1ObbSY8=",
+      "hash": "sha256-ljUjzyniIVJ0+SOY9NnmlB5hay3nDFzvkDXAmnp8ppQ=",
       "url": "js\/LocalStorageExtension.js"
     },
     {
@@ -257,5 +257,5 @@
       "url": "manifest.json"
     }
   ],
-  "version": "\/85JdH1w"
+  "version": "ZMC14E1A"
 };

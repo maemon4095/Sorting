@@ -10,7 +10,7 @@
 
         InvokeLocalStorageEvent({
             Key: key,
-            Category: 'Set',
+            Category: old === null ? 'Add' : 'Set',
             OldValue: old,
             NewValue: key
         });
