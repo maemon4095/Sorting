@@ -1,0 +1,33 @@
+﻿@namespace Sorting
+@inject IJSRuntime runtime
+@page "/charts"
+
+<p>@result</p>
+<button @onclick=Click>ClickMe</button>
+<button @onclick=Clear>Clear</button>
+
+
+@code {
+    dynamic? localStorage;
+    object? result = null;
+
+    protected override void OnInitialized()
+    {
+        localStorage = ((dynamic)(new DynamicJSRuntime(this.runtime))).LocalStorageExtension;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await localStorage?.SetLocalStorage("key", "value");
+    }
+
+    private async void Click()
+    {
+        this.result = await localStorage?.GetLocalStorage("key");
+    }
+
+    private async void Clear()
+    {
+        await localStorage?.ClearLocalStorage();
+    }
+}
